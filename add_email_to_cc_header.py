@@ -4,13 +4,14 @@ import re
 from chardet.universaldetector import UniversalDetector
 import codecs
 
-
+# find . -not -path '*/\.*' -type f -exec ./add_email_to_cc_header.py -i {} -e laurent@vincelette.net -v \;
 
 def getHeaders(lines):
     for i, line in enumerate(lines):
         #print (line)
         if line == '':
             return lines[:i]
+    return False
 
 def getCCStartAtLine(lines):
     for i, line in enumerate(lines):
@@ -31,7 +32,7 @@ def getInsertCCAt(lines):
     for i, line in enumerate(lines):
         match = re.match("^[TtOo]{2}:.*", line)
         if match:
-            return getCCEndAtLine(lines, i)
+            return getCCEndAtLine(lines, i) + 1
     return -1
 
 def isEmailInCC(lines, email):
@@ -84,6 +85,10 @@ def main():
         lines = f.read().splitlines()
     
     headers = getHeaders(lines)
+    if not headers :
+        vPrint ("headers not found.", verbose)
+        sys.exit()
+
     ccStartAtLine = getCCStartAtLine(headers)
     if (ccStartAtLine >= 0):
         ccEndAtLine = getCCEndAtLine(headers, ccStartAtLine)
@@ -124,5 +129,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 
 
